@@ -1,0 +1,70 @@
+#include <types.h>
+#include <lib.h>
+#include <wchan.h>
+#include <thread.h>
+#include <synch.h>
+#include <test.h>
+
+#include "opt-synchprobs.h"
+
+#define SIZE 20
+
+static struct semaphore *tsem = NULL;
+
+static
+void
+init_sem(void)
+{
+	if (tsem==NULL) {
+		tsem = sem_create("tsem", 0);
+		if (tsem == NULL) {
+			panic("threadtest: sem_create failed\n");
+		}
+	}
+}
+
+static
+void
+sender_th()
+{
+  char str[SIZE_STR];
+  while(1){
+    scanf("%s",&str);
+  }
+}
+
+static
+void
+receiver_th()
+{
+}
+
+static
+void
+run_send_rec()
+{
+  int result;
+  result = thread_fork("sender", sender_th, NULL, 1, NULL);
+  if (result) {
+    panic("Thread fork failed: sender -> %s\n", strerror(result));
+  }
+  result = thread_fork("receiver", receiver_th, NULL, 2, NULL);
+  if (result) {
+    panic("Thread fork failed: receiver -> %s\n", strerror(result));
+  }
+  
+}
+
+int
+threadtest4(int nargs, char **args)
+{
+  (void)nargs;
+  (void)args;
+  
+  init_sem();
+  kprintf("Starting thread test 4\n");
+  run_send_rec();
+  kprintf("\nThread test done.\n");
+
+  return 0;
+}
