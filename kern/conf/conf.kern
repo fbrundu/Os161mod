@@ -427,3 +427,4 @@ file		test/synchtest.c
 file		test/malloctest.c
 file		test/fstest.c
 optfile net	test/nettest.c
+file		test/es2x2.c
