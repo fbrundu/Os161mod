@@ -444,6 +444,7 @@ static const char *testmenu[] = {
 	"[tt2] Thread test 2                 ",
 	"[tt3] Thread test 3                 ",
 	"[tt4] Thread test 4                 ",
+	"[tt5] Thread test 5 - es2x2         ",
 #if OPT_NET
 	"[net] Network test                  ",
 #endif
@@ -555,6 +556,7 @@ static struct {
 	{ "tt2",	threadtest2 },
 	{ "tt3",	threadtest3 },
 	{ "tt4",        threadtest4 },
+	{ "tt5",        threadtest5 },
 	{ "sy1",	semtest },
 
 	/* synchronization assignment tests */
