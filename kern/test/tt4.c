@@ -25,7 +25,7 @@ init_sem(void)
 		}
 	}
 	if (ssem==NULL) {
-		ssem = sem_create("tsem", 0);
+		ssem = sem_create("ssem", 0);
 		if (ssem == NULL) {
 			panic("tt4.ssem: sem_create failed\n");
 		}
