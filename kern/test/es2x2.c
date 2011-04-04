@@ -18,13 +18,13 @@ static struct semaphore **sv = NULL;
 static int num_elem = 0;
 static int *vect = NULL;
 /* flag that indicates that some elements have been swapped */
-static int modified = 1;
+static int modified;
 
 static
 void
 init_sem_v(void)
 {
-  int i, n = num_elem-1;
+  int i;
   if(gsem == NULL){
     gsem = sem_create("gsem",0);
     if(gsem == NULL){
@@ -38,11 +38,11 @@ init_sem_v(void)
     }
   }
   if(sv == NULL){
-    sv = kmalloc(n*sizeof(struct semaphore*));
+    sv = kmalloc(num_elem*sizeof(struct semaphore*));
     if(sv == NULL)
       panic("tt5.init_sem: sv allocation failed\n");
     else {
-      for(i = 0; i < n; i++){
+      for(i = 0; i < num_elem; i++){
 	sv[i] = sem_create("sem_v",1);
 	if(sv[i] == NULL)
 	  panic("tt5.init_sem: sem_create failed\n");
@@ -53,9 +53,41 @@ init_sem_v(void)
 
 static
 void
+free_sem_v(void){
+  int i;
+  if(gsem != NULL){
+    sem_destroy(gsem);
+    /* Need a way to avoid memory leaks if sem_destroy
+     * doesn't work */
+    gsem = NULL;
+  }
+  if(msem != NULL){
+    sem_destroy(msem);
+    /* Need a way to avoid memory leaks if sem_destroy
+     * doesn't work */
+    msem = NULL;
+  }
+  if(sv != NULL){
+    for(i = 0; i < num_elem; i++){
+      if(sv[i] != NULL){
+	sem_destroy(sv[i]);
+	/* Need a way to avoid memory leaks if sem_destroy
+	 * doesn't work */
+	sv[i] = NULL;
+      }
+    }
+    kfree(sv);
+    /* Need a way to avoid memory leaks if kfree
+     * doesn't work */
+    sv = NULL;
+  }
+}
+
+static
+void
 print_vect(){
   int i;
-  kprintf("Il vettore ordinato è il seguente:\n");
+  kprintf("Sorted vector follows:\n");
   for(i = 0; i < num_elem; i++){
     kprintf("[%d] -> [%d]\n", i+1, vect[i]);
   }
@@ -91,7 +123,7 @@ swppr(void *junk, unsigned long ind){
   int tmp;
 
   (void)junk;
-
+  
   P(msem);
   P(sv[ind]);
   P(sv[ind+1]);
@@ -104,7 +136,7 @@ swppr(void *junk, unsigned long ind){
   V(sv[ind]);
   V(sv[ind+1]);
   V(msem);
-  /* synchronize with the master */
+  /* synchronizes with the master */
   V(gsem);
 }
 
@@ -114,38 +146,44 @@ run_vect()
 {
   int i, result;
   char name[SIZE_N+1];
+
   P(msem);
-  for(i = 0; i < num_elem-1; i++){
-    snprintf(name, sizeof(name), "t %d %d", i, i+1);
-    result = thread_fork(name, swppr, NULL, i, NULL);
-    if (result) {
-      panic("Thread fork failed: swapper -> %s\n", strerror(result));
-    }
-    kprintf("MAIN: %d threads created\n", num_elem-1);
-  }
+  modified = 1;
   while(modified > 0){
-    kprintf("MAIN: Modified. Loop\n");
+    for(i = 0; i < num_elem-1; i++){
+      snprintf(name, sizeof(name), "t %d %d", i, i+1);
+      result = thread_fork(name, swppr, NULL, i, NULL);
+      if (result) {
+	panic("Thread fork failed: swapper -> %s\n", strerror(result));
+      }
+      //kprintf("MAIN: %d threads created\n", num_elem-1);
+    }
+    //kprintf("MAIN: Modified. Loop\n");
     modified = 0;
     V(msem);
  
     i = num_elem-1;
     while(i>0){
-      kprintf("MAIN: Waiting %d threads\n", i);
+      //kprintf("MAIN: Waiting %d threads\n", i);
       P(gsem);
       i--;
     }
     P(msem);
   }
+  /* Releases the semaphore */ 
+  V(msem);
 }
 
 
 int
 threadtest5(int nargs, char **args)
 {
-  (void)nargs;
-  (void)args;
+  //int i;
   char str[SIZE_S+1];
   
+  (void)nargs;
+  (void)args;
+    
   kprintf("Insert vector size: ");
   kgets(str,SIZE_S);
   num_elem = read_num(str);
@@ -156,6 +194,12 @@ threadtest5(int nargs, char **args)
   run_vect();
   print_vect();
   kprintf("\nThread test done.\n");
-
+  /* Frees semaphores and vect */
+  //for(i = 0; i < 1000; i++){};
+  free_sem_v();
+  kfree(vect);
+  /* Need a way to avoid memory leaks if kfree
+   * doesn't work */
+  vect = NULL;
   return 0;
 }
