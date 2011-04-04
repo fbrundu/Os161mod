@@ -1,8 +1,8 @@
 OS 161 mod.
 New tests are under kern/test
-    * tt4.c
-    * es2x2.c
-Also, there is a example code at kern/startup named hello.c.
+    * tt4.c (tt4)
+    * es2x2.c (tt5)
+Also, there is an example code at kern/startup named hello.c.
 For toolchain installation see http://setupos161ubuntu.wikidot.com .
-To increment ramsize for sys161 emulator use sys161.conf in root directory (not present
+To increment ramsize for sys161 emulator edit sys161.conf in root directory (not present
 in this source tree).
