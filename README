@@ -3,6 +3,29 @@ New tests are under kern/test
     * tt4.c (tt4)
     * es2x2.c (tt5)
 Also, there is an example code at kern/startup named hello.c.
-For toolchain installation see http://setupos161ubuntu.wikidot.com .
+For toolchain installation see http://setupos161ubuntu.wikidot.com or read this
+	
+	Setup toolchain:
+	http://www.eecs.harvard.edu/~dholland/os161/resources/setup.html
+	WARNING:
+	for bmake e mk grab this versions:
+	http://www.eecs.harvard.edu/~dholland/os161/download/bmake-20081111.tar.gz 
+	http://www.eecs.harvard.edu/~dholland/os161/download/mk-20081111.tar.gz
+	patch gdb sources following these messages:
+	http://sources.redhat.com/ml/gdb/2004-12/msg00118.html
+	http://www.cygwin.com/ml/gdb/2007-07/msg00114.html
+	To remove errors about makeinfo, install texinfo and substitute in every Makefile 
+	"MAKEINFO = */missing makeinfo" 
+	with 
+	"MAKEINFO = makeinfo"
+
+	Building kernel
+	http://www.eecs.harvard.edu/~dholland/os161/resources/building.html
+	"bmake -k" to disable errors
+
+	in the end put sys161.conf.sample in root directory and rename it sys161.conf
+
+	~francesco	
+
 To increment ramsize for sys161 emulator edit sys161.conf in root directory (not present
 in this source tree).
